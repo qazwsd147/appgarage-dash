@@ -22,7 +22,7 @@ VC=$(date +%s)
 
 rm -rf build && mkdir -p build/classes build/dex
 echo "== [1/6] javac (release 8) =="
-"$JAVAC" --release 8 -g -d build/classes -classpath "$ANDJAR" src/com/appgarage/dash/*.java
+"$JAVAC" --release 8 -encoding UTF-8 -g -d build/classes -classpath "$ANDJAR" src/com/appgarage/dash/*.java
 echo "  compiled: $(find build/classes -name '*.class' | wc -l) classes"
 
 echo "== [2/6] d8 -> classes.dex (min-api 10) =="
@@ -32,7 +32,7 @@ ls -l build/dex/classes.dex
 echo "== [3/6] package APK (versionCode=$VC) =="
 # stamp versionCode into a temp manifest (aapt honors the manifest value; --version-code is a no-op here)
 sed "s/android:versionCode=\"[0-9]*\"/android:versionCode=\"$VC\"/" AndroidManifest.xml > build/AndroidManifest.xml
-"$AAPT" package -f -M build/AndroidManifest.xml -S res -I "$ANDJAR" -F build/dash.unsigned.apk
+"$AAPT" package -f -M build/AndroidManifest.xml -S res -A assets -I "$ANDJAR" -F build/dash.unsigned.apk
 ( cd build/dex && "$AAPT" add ../dash.unsigned.apk classes.dex >/dev/null )
 
 echo "== [4/6] zipalign =="

@@ -31,7 +31,6 @@ public class MainActivity extends Activity implements SensorEventListener {
         view = new GaugeView(this);
         setContentView(view);
         sm = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        registerAll();
     }
 
     private void registerAll() {
@@ -40,14 +39,23 @@ public class MainActivity extends Activity implements SensorEventListener {
         try {
             List<Sensor> all = sm.getSensorList(Sensor.TYPE_ALL);
             if (all != null) for (Sensor s : all) {
-                view.setName(s.getType(), s.getName());
-                if (s.getType() == 13) hasVehicleBus = true;         // 13 = ENGINE_RPM
-                try { sm.registerListener(this, s, 200000); n++; } catch (Throwable ignored) {}
+                view.setSensorInfo(s.getType(), s.getName(), s.getVendor());
+                boolean vehicleSensor = isVehicleSensor(s);
+                if (vehicleSensor) hasVehicleBus = true;
+                try { if (sm.registerListener(this, s, 200000) && vehicleSensor) n++; } catch (Throwable ignored) {}
             }
         } catch (Throwable t) { view.setStatus("getSensorList error: " + t); }
         if (!hasVehicleBus) view.seedDemo();                          // emulator / no CAN -> show layout
-        else view.setStatus(n + " CAN signals live");
+        else view.setLiveSignalCount(n);
         view.invalidate();
+    }
+
+    private boolean isVehicleSensor(Sensor sensor) {
+        String name = sensor.getName() == null ? "" : sensor.getName().toUpperCase();
+        String vendor = sensor.getVendor() == null ? "" : sensor.getVendor().toUpperCase();
+        int type = sensor.getType();
+        return vendor.indexOf("YGOMI") >= 0 || name.indexOf("VS_ID") >= 0
+                || (type >= 12 && type <= 53);
     }
 
     @Override protected void onResume() { super.onResume(); registerAll(); }
@@ -56,8 +64,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent e) {
         try {
-            float v = (e.values != null && e.values.length > 0) ? e.values[0] : 0f;
-            view.setValue(e.sensor.getType(), v);
+            view.setValues(e.sensor.getType(), e.values);
             view.invalidate();
         } catch (Throwable ignored) {}
     }

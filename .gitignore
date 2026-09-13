@@ -4,6 +4,8 @@ _selftest/
 __pycache__/
 *.apk
 *.epk
+.vscode/
+preview.cmd
 
 # app signing key — each builder generates their own
 keystore.ks

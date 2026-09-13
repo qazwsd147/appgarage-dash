@@ -6,6 +6,10 @@
 
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10" />
 
+    <!-- Read-only Bluetooth capability/paired-device probe; later used for user-confirmed OPP export. -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
     <!-- read the vehicle CAN signals (VS_ID_* sensors). protectionLevel=dangerous -> auto-granted on API 10 -->
     <uses-permission android:name="com.ygomi.permission.IVI_CAN_READ" />
 

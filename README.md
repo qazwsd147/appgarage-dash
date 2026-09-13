@@ -39,9 +39,65 @@ hosts the "App Garage." Two things make this app possible:
 
 Pure-Java, ships no native code (runs on the x86 CPU), needs no Google services, works fully offline.
 
+## Language and display units
+
+Tap **SETTINGS** at the bottom of the dashboard to change the display without leaving the app.
+Preferences are saved on the head unit and restored the next time the dashboard starts.
+
+- Language: English / Traditional Chinese (繁體中文)
+- Engine profile / RPM redline: VR30DDTT 6800 / VQ35HR 7000 / VQ37VHR 7500 rpm
+- Speed: mph / km/h
+- Pressure: psi / kPa (applies to oil pressure and TPMS)
+- Power: kW / PS
+- Torque: Nm / kgm
+
+UI translations are maintained outside the Java source in `assets/i18n/en.json` and
+`assets/i18n/zh-TW.json`. They are loaded once when the dashboard starts; a missing key falls back
+to English and then to the key name. Add another JSON catalog and language option to extend i18n.
+
+Tap **CAN** at the bottom of the dashboard to open the live diagnostics screen. It lists every
+sensor reported by `SensorManager`, including unknown/custom types, with its type, name/vendor, raw
+value vector (up to four fields), observed first-field range, average update rate, and current state
+(`LIVE`, `STALE`, or `NO DATA`). Signals used by the
+dashboard are marked `VR30 MAP`; everything else is marked `UNKNOWN`. Use PREV/NEXT to inspect
+additional sensor pages. On a VQ35 Hybrid or any non-VR30 vehicle, treat the raw values as the truth
+until each mapping and scaling has been verified on-car.
+
+The diagnostics header also has a **SYSTEM** page. It performs a read-only inventory of Binder
+services, installed packages, Android services, providers, receivers, and relevant permissions. No
+unknown Binder call or CAN write is issued. Keyword matches are placed first so the results can be
+photographed directly from a head unit that cannot export files.
+
+The SYSTEM probe also reports whether Android exposes a Bluetooth adapter, paired devices, and an
+`ACTION_SEND` handler for APK files. This confirms Bluetooth OPP feasibility before any export
+feature is enabled.
+
+It also lists visible network interfaces/IP addresses, external-storage and USB/SD mount points,
+their available/total capacity, and each installed APK's byte size plus read/write accessibility. These checks stay read-only and
+are intended to select a safe export path before copying any system package.
+
+## Preview on Windows
+
+An Android 2.3.3 (API 10) x86 AVD named `AppGarage_Dash_API10` can run the dashboard without a
+vehicle. Double-click `preview.cmd` after building: it starts the emulator, waits for Android to
+boot, installs `build/dash.apk`, and opens the dashboard in DEMO mode. The AVD is configured for the
+head unit's 800x480 landscape display. Hardware acceleration must be enabled for usable performance.
+
 ## Signals & calibration
 
 Raw sensor values are unlabeled floats; these were calibrated against the VR30DDTT they were read from:
+
+### VQ35HR Hybrid field observations
+
+The VQ35HR Hybrid firmware uses the same Android sensor type numbers but does not necessarily use the
+same calibration as the VR30DDTT.  On the tested vehicle, types 15, 16, 12, and 32 reported negative
+placeholder values (`-50`, `-0.098`, `-398`, and `-408462.5`) while stationary.  With the VQ35HR
+profile selected, the dashboard therefore renders these values as `--`; the CAN diagnostics screen
+continues to show the untouched raw values for calibration.
+
+Type 13 is still named `VS_ID_ENGINE_RPM` by the vehicle and remains the RPM source.  A zero reading
+can be valid while the hybrid system is READY but the combustion engine is stopped.  Type 43 is named
+`VS_ID_DISTANCETOTALIZER` and must not be used as RPM without stronger capture evidence.
 
 | Gauge | Sensor | Scaling | Notes |
 |---|---|---|---|
