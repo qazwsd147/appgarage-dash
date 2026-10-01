@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 
 import java.util.Locale;
 
-/** Persistent display preferences, kept deliberately API-10 compatible. */
+/** 可持久保存的顯示偏好設定；刻意維持 API 10 相容性。 */
 final class DashboardSettings {
     static final int LANG_EN = 0;
     static final int LANG_ZH_TW = 1;

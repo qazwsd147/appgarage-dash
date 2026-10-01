@@ -7,7 +7,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
-/** Loads the UI translations from assets/i18n, with English and key fallbacks. */
+/** 從 assets/i18n 載入介面翻譯，缺少內容時依序回退至英文與鍵名。 */
 final class DashboardStrings {
     static final String RPM = "rpm";
     static final String REDLINE = "redline";

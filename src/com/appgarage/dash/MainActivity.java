@@ -12,12 +12,12 @@ import android.view.WindowManager;
 import java.util.List;
 
 /**
- * AppGarage Dash — a dongle-free vehicle dashboard for the Infiniti InTouch head unit
- * (V37 Q50 / Q60 running the Android 2.3.x InTouch revision). The head unit exposes the
- * car's CAN signals (RPM, oil temp/pressure, coolant, speed, G, gear, throttle, power,
- * TPMS ...) as standard Android Sensors (VS_ID_*, vendor "Ygomi"), types 12-53. We
- * register a listener on every one and hand live values to GaugeView, which renders the
- * calibrated gauges. Pure Java, no native libs, minSdk 10 -> runs on the x86 API-10 unit.
+ * AppGarage Dash 是供 Infiniti InTouch 車機使用的免轉接器車輛儀表板
+ * （適用於搭載 Android 2.3.x 版 InTouch 的 V37 Q50／Q60）。車機會將車輛的 CAN 訊號
+ * （轉速、機油溫度／壓力、冷卻液溫度、速度、G 值、檔位、油門、功率、胎壓等）
+ * 以標準 Android Sensor 形式公開（VS_ID_*、廠商為「Ygomi」），類型編號為 12–53。
+ * 本程式會為每個感測器註冊監聽器，並將即時值交給 GaugeView 繪製經校正的儀表。
+ * 程式使用純 Java、不含原生程式庫，minSdk 為 10，可在 x86 API 10 車機上執行。
  */
 public class MainActivity extends Activity implements SensorEventListener {
 
@@ -45,7 +45,7 @@ public class MainActivity extends Activity implements SensorEventListener {
                 try { if (sm.registerListener(this, s, 200000) && vehicleSensor) n++; } catch (Throwable ignored) {}
             }
         } catch (Throwable t) { view.setStatus("getSensorList error: " + t); }
-        if (!hasVehicleBus) view.seedDemo();                          // emulator / no CAN -> show layout
+        if (!hasVehicleBus) view.seedDemo();                          // 模擬器／沒有 CAN 時顯示示範版面
         else view.setLiveSignalCount(n);
         view.invalidate();
     }

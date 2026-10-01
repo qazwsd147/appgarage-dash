@@ -6,16 +6,16 @@
 
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="10" />
 
-    <!-- Read-only Bluetooth capability/paired-device probe; later used for user-confirmed OPP export. -->
+    <!-- 唯讀檢查藍牙功能與已配對裝置；日後可供使用者確認後執行 OPP 匯出。 -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
-    <!-- read the vehicle CAN signals (VS_ID_* sensors). protectionLevel=dangerous -> auto-granted on API 10 -->
+    <!-- 讀取車輛 CAN 訊號（VS_ID_* 感測器）。protectionLevel=dangerous，在 API 10 上會自動授權。 -->
     <uses-permission android:name="com.ygomi.permission.IVI_CAN_READ" />
 
     <application android:label="AppGarage Dash" android:icon="@drawable/ic_launcher" android:allowBackup="true">
-        <!-- ivi.isDistractive=false => runningRestriction=0 => USABLE WHILE DRIVING.
-             (PackageParser defaults absent apps to 3 = restricted.) Matches DrivingPerformance. -->
+        <!-- ivi.isDistractive=false => runningRestriction=0 => 行駛中仍可使用。
+             （PackageParser 對未設定的應用程式預設為 3，即受限。）與 DrivingPerformance 的設定相同。 -->
         <meta-data android:name="ivi.isDistractive"  android:value="false" />
         <meta-data android:name="ivi.shortcut"       android:value="true" />
         <meta-data android:name="ivi.audio"          android:value="false" />

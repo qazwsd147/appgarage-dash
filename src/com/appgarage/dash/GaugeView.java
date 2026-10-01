@@ -11,28 +11,28 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * Vehicle gauge dashboard for the 800x480 InTouch head-unit screen. Reads RAW
- * VS_ID_* sensor values (set via setValue(type, raw)) and renders calibrated gauges.
+ * 供 800×480 InTouch 車機螢幕使用的車輛儀表板。讀取原始 VS_ID_* 感測器值
+ * （透過 setValue(type, raw) 設定），並繪製經校正的儀表。
  *
- * Calibration (locked from on-car data + the DrivingPerformance reference app):
- *   RPM(13) = rpm, direct.        COOLANT(14) / OILTEMP(15) = degC, direct.
- *   TPMS(36-39) = psi, direct.    TORQUE(12) ~ Nm.
- *   POWER(32) = rpm*Nm  -> kW  = raw * 1.047e-4.
- *   OILPRESS(16) = MPa  -> psi = raw * 145  (confirmed ~22 psi warm idle).
- *   SPEED(17) = km/h    -> mph = raw * 0.621.
- *   GEAR(22) enum: P/R/N/D = 1/2/3/4, manual M1..M7 = 16..22 (confirmed on-car).
- *   G lat(20)/long(21): raw, ~1g full-scale assumed (not yet calibrated).
+ * 校正資料（依實車資料及 DrivingPerformance 參考應用程式確認）：
+ *   RPM(13) = rpm，直接讀值。       COOLANT(14)／OILTEMP(15) = °C，直接讀值。
+ *   TPMS(36-39) = psi，直接讀值。   TORQUE(12) 約為 Nm。
+ *   POWER(32) = rpm×Nm；kW = 原始值 × 1.047e-4。
+ *   OILPRESS(16) = MPa；psi = 原始值 × 145（已確認暖車怠速約為 22 psi）。
+ *   SPEED(17) = km/h；mph = 原始值 × 0.621。
+ *   GEAR(22) 列舉值：P／R／N／D = 1／2／3／4，手排模式 M1–M7 = 16–22（已在實車確認）。
+ *   橫向 G(20)／縱向 G(21)：原始值；暫定滿刻度約為 1g（尚未校正）。
  */
 public class GaugeView extends View {
 
-    // sensor types
+    // 感測器類型
     private static final int TORQUE=12, RPM=13, COOLANT=14, OILT=15, OILP=16, SPEED=17,
             GLAT=20, GLONG=21, GEAR=22, THROTTLE=23, POWER=32,
             TP_FR=36, TP_FL=37, TP_RR=38, TP_RL=39;
 
-    // scaling constants (calibrated on-car). Oil-pressure raw is MPa: x145 -> psi, or x10 -> bar.
-    public static float OILP_RAW_TO_PSI = 145.0377f;   // MPa -> psi (~22 psi warm idle)
-    public static float POWER_RAW_TO_KW = 0.0001047f;  // raw = rpm*Nm -> kW
+    // 換算常數（已在實車校正）。機油壓力原始值為 MPa：×145 轉為 psi，或 ×10 轉為 bar。
+    public static float OILP_RAW_TO_PSI = 145.0377f;   // MPa -> psi（暖車怠速約 22 psi）
+    public static float POWER_RAW_TO_KW = 0.0001047f;  // 原始值 = rpm×Nm -> kW
     public static float SPEED_RAW_TO_MPH = 0.621371f;  // km/h -> mph
     private static final float PSI_TO_KPA = 6.894757f;
     private static final float KW_TO_PS = 1.3596216f;
@@ -40,7 +40,7 @@ public class GaugeView extends View {
     private static final int SETTINGS_ROW_TOP = 108;
     private static final int SETTINGS_ROW_STEP = 46;
 
-    // Leave room for unknown/custom sensor types discovered on non-VR30 InTouch firmware.
+    // 預留空間給非 VR30 InTouch 韌體中發現的未知／自訂感測器類型。
     private static final int N = 256;
     private final float[] v = new float[N];
     private final boolean[] have = new boolean[N];
@@ -74,7 +74,7 @@ public class GaugeView extends View {
     private final DashboardStrings strings;
     private final SystemProbe systemProbe;
 
-    // colors
+    // 顏色
     private static final int BG=0xFF0B0E12, PANEL=0xFF151B22, LABEL=0xFF7FB0FF,
             VAL=0xFFFFFFFF, DIM=0xFF6A7684, OK=0xFF37E07A, WARN=0xFFFFB020, DANGER=0xFFFF4040,
             ARC_BG=0xFF243040, ARC_FG=0xFF39C0FF;
@@ -123,7 +123,7 @@ public class GaugeView extends View {
     private float g(int t) { return have[t] ? v[t] : 0f; }
     private boolean h(int t) { return have[t]; }
 
-    /** seed representative values so the layout is visible on an emulator (no vehicle bus). */
+    /** 填入代表性數值，讓沒有車輛匯流排的模擬器也能顯示版面。 */
     public void seedDemo() {
         int[] t = {TORQUE,RPM,COOLANT,OILT,OILP,SPEED,GLAT,GLONG,GEAR,THROTTLE,POWER,TP_FR,TP_FL,TP_RR,TP_RL};
         float[] val = {180f,3120f,92f,105f,0.42f,68f,0.35f,-0.20f,3f,42f,3120f*180f,38.5f,38.5f,37f,36.8f};
@@ -140,14 +140,14 @@ public class GaugeView extends View {
                 ? Typeface.DEFAULT : Typeface.MONOSPACE);
         p.setColor(BG); cv.drawRect(0,0,W,H,p);
 
-        // Compact RPM at upper-left; primary driving values occupy the upper-right row.
+        // 左上顯示精簡轉速表，主要行車數值排列在右上方。
         drawRpm(cv, 92, 88, 66);
         drawBigNum(cv, 210, 26, tr(DashboardStrings.SPEED), fmt0(speed()), speedUnit(), h(SPEED));
         drawBigNum(cv, 370, 26, tr(DashboardStrings.GEAR), gearStr(), "", h(GEAR));
         drawBigNum(cv, 510, 26, tr(DashboardStrings.THROTTLE), fmt0(g(THROTTLE)), "%", h(THROTTLE));
 
-        // Compact vertical temperature/pressure bars leave room for the G display.
-        int barStart=W/2-142; // 284 px group width: centered regardless of the display width
+        // 使用精簡的垂直溫度／壓力條，為 G 值顯示保留空間。
+        int barStart=W/2-142; // 群組寬度為 284 px，不論螢幕寬度都置中顯示
         drawVerticalBar(cv, barStart, 150, 54, 108, tr(DashboardStrings.OIL_TEMP),
                 g(OILT), 40,150,120,140,"°C",hasDisplayValue(OILT));
         drawVerticalBar(cv, barStart+115, 150, 54, 108, tr(DashboardStrings.COOLANT),
@@ -156,7 +156,7 @@ public class GaugeView extends View {
                 oilPressure(),0,pressureFromPsi(100),pressureFromPsi(90),pressureFromPsi(100),
                 pressureUnit(),hasDisplayValue(OILP));
 
-        // power + torque
+        // 功率與扭力
         p.setTextSize(14f);
         p.setColor(LABEL); cv.drawText(tr(DashboardStrings.POWER), W-250, 316, p);
         p.setColor(hasDisplayValue(POWER)?VAL:DIM); p.setTextSize(24f);
@@ -168,7 +168,7 @@ public class GaugeView extends View {
         drawTpms(cv, 16, 300, 280);
         drawGball(cv, W-92, 88, 66);
 
-        // status footer
+        // 狀態頁尾
         p.setColor(DIM); p.setTextSize(11f);
         cv.drawText(statusText(), 16, H-8, p);
         drawFooterButtons(cv, W, H);
@@ -181,14 +181,14 @@ public class GaugeView extends View {
         oval.set(cx-r, cy-r, cx+r, cy+r);
         p.setStyle(Paint.Style.STROKE); p.setStrokeWidth(Math.max(7f,r*0.13f));
         p.setColor(ARC_BG); cv.drawArc(oval, start, sweep, false, p);
-        // redline zone
+        // 紅線區域
         p.setColor(0x66FF4040); cv.drawArc(oval, start+sweep*(red/max), sweep*(1-red/max), false, p);
-        // value arc
+        // 數值圓弧
         float frac=Math.max(0,Math.min(1,val/max));
         p.setColor(val>=red?DANGER:ARC_FG); cv.drawArc(oval, start, sweep*frac, false, p);
         p.setStyle(Paint.Style.FILL);
         drawRpmTicks(cv,cx,cy,r,max,start,sweep);
-        // digital center
+        // 中央數位讀值
         p.setColor(LABEL); p.setTextSize(11f); center(cv,tr(DashboardStrings.RPM),cx,cy-20);
         p.setColor(val>=red?DANGER:VAL); p.setTextSize(32f); center(cv, h(RPM)?fmt0(val):"--", cx, cy+10);
         p.setColor(DIM); p.setTextSize(10f);
@@ -196,10 +196,9 @@ public class GaugeView extends View {
     }
 
     /**
-     * A received value is not necessarily a usable measurement.  The VQ35HR Hybrid
-     * firmware observed in-car reports negative placeholder values for several
-     * fields that use the VR30 mapping.  Keep those raw values in CAN diagnostics,
-     * but do not present them as real oil, power, or torque readings.
+     * 收到數值不代表它一定是可用的測量結果。實車觀察發現，VQ35HR Hybrid 韌體會對數個
+     * 使用 VR30 對應的欄位回報負數占位值。這些原始值會保留在 CAN 診斷畫面中，
+     * 但不會顯示成真正的機油、功率或扭力讀值。
      */
     private boolean hasDisplayValue(int type) {
         if (!h(type)) return false;
@@ -273,7 +272,7 @@ public class GaugeView extends View {
         cv.drawCircle(cx,cy,r,p); cv.drawCircle(cx,cy,r/2,p);
         cv.drawLine(cx-r,cy,cx+r,cy,p); cv.drawLine(cx,cy-r,cx,cy+r,p);
         p.setStyle(Paint.Style.FILL); p.setColor(LABEL); p.setTextSize(12f); center(cv,"G",cx,cy-r-4);
-        // long accel = vertical (fwd up), lat = horizontal; assume ~1g full-scale
+        // 縱向加速度為垂直方向（向前為上），橫向加速度為水平方向；暫定滿刻度約為 1g。
         float gx=Math.max(-1,Math.min(1,g(GLAT))), gy=Math.max(-1,Math.min(1,g(GLONG)));
         p.setColor(OK); cv.drawCircle(cx+gx*r, cy-gy*r, 6f, p);
     }
@@ -365,8 +364,8 @@ public class GaugeView extends View {
         drawSettingRow(cv, top+SETTINGS_ROW_STEP*4, tr(DashboardStrings.POWER_UNIT), powerUnit());
         drawSettingRow(cv, top+SETTINGS_ROW_STEP*5, tr(DashboardStrings.TORQUE_UNIT), torqueUnit());
 
-        // Keep DONE in the header. Android 2.3's system/status bars reduce the Activity height,
-        // so a bottom-anchored button can overlap the fifth settings row on an 800x480 display.
+        // 將 DONE 保留在標題列。Android 2.3 的系統列／狀態列會縮減 Activity 高度，
+        // 因此固定在底部的按鈕可能會在 800×480 顯示器上與第五個設定項目重疊。
         settingsButton.set(w-250, 53, w-112, 91);
         p.setColor(ARC_FG); cv.drawRoundRect(settingsButton, 6, 6, p);
         p.setColor(BG); p.setTextSize(16f);
@@ -627,7 +626,7 @@ public class GaugeView extends View {
         invalidate();
         return true;
     }
-    // GEAR_POSITION enum (confirmed on-car): P/R/N/D = 1/2/3/4; manual mode M1..M7 = 16..22.
+    // GEAR_POSITION 列舉值（已在實車確認）：P／R／N／D = 1／2／3／4；手排模式 M1–M7 = 16–22。
     private String gearStr(){
         if(!h(GEAR)) return "--";
         int gg=Math.round(g(GEAR));

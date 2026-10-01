@@ -25,7 +25,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 
-/** Read-only inventory of interfaces already exposed by the head unit. */
+/** 以唯讀方式盤點車機已公開的介面。 */
 final class SystemProbe {
     static final class Entry {
         final String kind, name, detail;
@@ -52,8 +52,8 @@ final class SystemProbe {
         collectStorage();
         collectBinderServices();
         collectPackages();
-        // Keep the bytecode simple for the old API-10 DEX toolchain: stable-partition
-        // matches to the front without an anonymous Comparator class.
+        // 為舊版 API 10 DEX 工具鏈維持簡單的位元碼：使用穩定分割將符合項目移到前方，
+        // 避免建立匿名 Comparator 類別。
         ArrayList<Entry> ordered=new ArrayList<Entry>();
         for (Entry e:entries) if (e.relevant) ordered.add(e);
         for (Entry e:entries) if (!e.relevant) ordered.add(e);
