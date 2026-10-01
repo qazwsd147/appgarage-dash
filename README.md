@@ -117,7 +117,7 @@ VQ35HR Hybrid 韌體使用相同的 Android 感測器類型編號，但不一定
 請透過 `JAVA_HOME` 與 `ANDROID_SDK` 環境變數指定工具鏈，或編輯 `build.sh` 開頭的兩行設定。
 
 ```sh
-git clone https://github.com/bugjosh/appgarage-dash && cd appgarage-dash
+git clone https://github.com/qazwsd147/appgarage-dash && cd appgarage-dash
 bash build.sh          # -> build/dash.apk 與 build/dash.epk（可由 App Garage 載入）
 ```
 
